@@ -12,9 +12,9 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class ProductStatusChangerDTO {
-    @NotNull(message = "id é um campo obrigatório")
-    @JsonProperty("id")
-    private Long id;
+    @NotNull(message = "productSku é um campo obrigatório")
+    @JsonProperty("productSku")
+    private String productSku;
 
     @NotNull(message = "productStatus é um campo obrigatório")
     @JsonProperty("productStatus")

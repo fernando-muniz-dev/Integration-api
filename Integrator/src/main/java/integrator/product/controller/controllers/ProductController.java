@@ -38,7 +38,14 @@ public class ProductController {
         return productService.updateProduct(productMapper.toEntity(productDTO));
     }
 
+    @PutMapping("deactivate")
+    @SuccessMessage("Produto desativado com sucesso")
+    public Product deactivateProduct(@RequestBody @Valid ProductStatusChangerDTO productStatusChangerDTO){
+        return productService.deactivateProduct(productStatusChangerDTO);
+    }
+
     @PutMapping("/reactivate/{productSku}")
+    @SuccessMessage("Produto reativado com sucesso")
     public Product reactivateProduct(@PathVariable String productSku){
         return productService.reactivateProduct(productSku);
     }

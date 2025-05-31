@@ -12,9 +12,11 @@ public interface ClientMapper {
     Client toEntity(ClientDTO clientDTO);
 
     @Mapping(target = "clientDocument", ignore = true)
+    @Mapping(target = "clientStatus", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateClientFromDto(Client source, @MappingTarget Client target);
 
+    @Mapping(target = "clientStatus", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateClientChangingTitularity(Client source, @MappingTarget Client target);
 }

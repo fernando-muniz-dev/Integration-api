@@ -68,17 +68,14 @@ public class ProductService {
             Product existingProduct = productRepository.getProductBySKU(productSku)
                     .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
-            if(existingProduct.getProductStatus() == null){
+            if(existingProduct.getProductStatus() == null)
                 throw new InternalServerErrorException("Status do produto é null, verificar inconsistencia");
-            }
 
-            if(existingProduct.getProductStatus().equals(ProductStatus.AVAILABLE)){
+            if(existingProduct.getProductStatus().equals(ProductStatus.AVAILABLE))
                 throw new BadRequestException("Produto ja se encontra ativo");
-            }
 
-            if(existingProduct.getProductStatus().canBeCancelled()){
+            if(existingProduct.getProductStatus().canBeCancelled())
                 throw new BadRequestException("Status atual não permite reativação");
-            }
 
             existingProduct.setProductStatus(ProductStatus.AVAILABLE);
             productRepository.save(existingProduct);
@@ -88,23 +85,39 @@ public class ProductService {
         });
     }
 
+    public Product deactivateProduct(ProductStatusChangerDTO productStatusChangerDTO){
+        return execute(logger, "Erro ao desativar o produto", () ->{
+            Product existingProduct = productRepository.getProductBySKU(productStatusChangerDTO.getProductSku())
+                    .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
+
+            if (existingProduct.getProductStatus() == null)
+                 throw new InternalServerErrorException("Status do produto é null, verifique a inconsistencia");
+
+            if(!existingProduct.getProductStatus().equals(ProductStatus.AVAILABLE))
+                throw new BadRequestException("Status atual não permite a desativação");
+
+            existingProduct.setProductStatus(productStatusChangerDTO.getProductStatus());
+            productRepository.save(existingProduct);
+
+            return existingProduct;
+        });
+    }
+
     public Product cancellingProduct(ProductStatusChangerDTO productStatusChangerDTO){
         return execute(logger, "Erro ao cancelar o produto", () ->{
 
-            Product existingProduct = productRepository.getProductById(productStatusChangerDTO.getId())
+            Product existingProduct = productRepository.getProductBySKU(productStatusChangerDTO.getProductSku())
                     .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
-            if(existingProduct.getProductStatus() == null){
+            if(existingProduct.getProductStatus() == null)
                 throw new InternalServerErrorException("Status do produto é null, verificar inconsistencia");
-            }
 
-            if(existingProduct.getProductStatus().canBeCancelled()){
-                throw new BadRequestException("Produto ja se encontra cancelado, Status do produto é esse: " + existingProduct.getProductStatus().getStatusDescription());
-            }
+            if(existingProduct.getProductStatus().canBeCancelled())
+                throw new BadRequestException("Produto ja se encontra cancelado, Status do produto é esse: "
+                        + existingProduct.getProductStatus().getStatusDescription());
 
-            if(productStatusChangerDTO.getProductStatus().canBeCancelled()){
+            if(productStatusChangerDTO.getProductStatus().canBeCancelled())
                 throw new BadRequestException("Status inválido para cancelamento do produto");
-            }
 
             existingProduct.setProductStatus(productStatusChangerDTO.getProductStatus());
             return productRepository.save(existingProduct);

@@ -10,7 +10,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("Select p from Product p where p.productSku = :sku")
     Optional<Product> getProductBySKU(String sku);
-
-    @Query("Select p from Product p where p.id = :id")
-    Optional<Product> getProductById(Long id);
 }
