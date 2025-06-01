@@ -2,6 +2,7 @@ package integrator.product.controller.controllers;
 
 import integrator.product.controller.response.ApiResponse;
 import integrator.product.controller.validator.constraints.SuccessMessage;
+import integrator.product.controller.validator.utils.MultiStatusResult;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 @ControllerAdvice
 public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
@@ -38,6 +40,21 @@ public class ApiResponseWrapper implements ResponseBodyAdvice<Object> {
             message = method.getAnnotation(SuccessMessage.class).value();
         }
 
-        return new ApiResponse<>(HttpStatus.OK.value(), message, body);
+        HttpStatus status = HttpStatus.OK;
+
+        // Verifica se é uma lista de resultados que podem ter erro
+        if (body instanceof List<?> list) {
+            boolean hasError = list.stream()
+                    .filter(MultiStatusResult.class::isInstance)
+                    .map(MultiStatusResult.class::cast)
+                    .anyMatch(MultiStatusResult::hasError);
+
+            if (hasError) {
+                status = HttpStatus.MULTI_STATUS;
+            }
+        }
+
+        response.setStatusCode(status);
+        return new ApiResponse<>(status.value(), message, body);
     }
 }

@@ -1,29 +1,23 @@
-package integrator.product.domain.model.entities;
+package integrator.product.controller.dtos;
 
 import integrator.product.controller.validator.constraints.ValidEnum;
+import integrator.product.domain.model.entities.ComboProductAttach;
 import integrator.product.domain.model.enums.ComboProductStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-@Entity
-@Table(name = "combo_product")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ComboProduct {
+public class ComboProductDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "combo_product_id")
     private Long id;
 
     private String comboName;
@@ -33,4 +27,6 @@ public class ComboProduct {
     @Enumerated(EnumType.ORDINAL)
     @ValidEnum(enumClass = ComboProductStatus.class, ignoreCase = true)
     private ComboProductStatus comboProductStatus;
+
+    private List<ComboProductAttach> comboProductAttaches;
 }
