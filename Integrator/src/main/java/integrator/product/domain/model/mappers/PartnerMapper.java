@@ -14,5 +14,5 @@ public interface PartnerMapper {
     @Mapping(target = "partnerDocument", ignore = true)
     @Mapping(target = "partnerStatus", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateClientFromDto(Partner source, @MappingTarget Partner target);
+    void updatePartnerFromDto(Partner source, @MappingTarget Partner target);
 }

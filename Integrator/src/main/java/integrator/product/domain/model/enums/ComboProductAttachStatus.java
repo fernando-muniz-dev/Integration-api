@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ComboProductAttachStatus {
-    LINKED("Contrato ativado"),
-    UNLINKED("Contrato inativado"),
+    LINKED("Ativado"),
+    UNLINKED("Inativado"),
     UNIQUE_PRODUCT("Produto único"),;
 
     final String statusDescription;

@@ -1,8 +1,11 @@
 package integrator.product.controller.controllers;
 
 import integrator.product.controller.dtos.ComboProductDTO;
+import integrator.product.controller.dtos.ComboProductStatusChangerDTO;
+import integrator.product.controller.dtos.PurchaseComboDTO;
 import integrator.product.controller.validator.constraints.SuccessMessage;
 import integrator.product.domain.model.entities.ComboProduct;
+import integrator.product.domain.model.mappers.ComboProductMapper;
 import integrator.product.domain.services.ComboProductService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +17,11 @@ import java.util.List;
 public class ComboProductController {
 
     private final ComboProductService comboProductService;
+    private final ComboProductMapper comboProductMapper;
 
-    public ComboProductController(ComboProductService comboProductService) {
+    public ComboProductController(ComboProductService comboProductService, ComboProductMapper comboProductMapper) {
         this.comboProductService = comboProductService;
+        this.comboProductMapper = comboProductMapper;
     }
 
     @PostMapping
@@ -42,25 +47,31 @@ public class ComboProductController {
 
     @PutMapping
     @SuccessMessage("Combo atualizado com sucesso")
-    public ComboProduct updateComboProductInfos(){
-        return null;
+    public ComboProduct updateComboProductInfos(ComboProductDTO comboProductDTO){
+        return comboProductService.updateComboProduct(comboProductMapper.toEntity(comboProductDTO));
     }
 
     @PutMapping("/deactivate")
     @SuccessMessage("Combo desativado com sucesso")
-    public ComboProduct deactivateComboProduct(){
-        return null;
+    public ComboProduct deactivateComboProduct(ComboProductStatusChangerDTO productStatusChangerDTO){
+        return comboProductService.deactivateComboProduct(productStatusChangerDTO);
     }
 
     @PutMapping("/reactivate")
     @SuccessMessage("Combo reativado com sucesso")
-    public ComboProduct reactivateComboProduct(){
-        return null;
+    public ComboProduct reactivateComboProduct(ComboProductStatusChangerDTO productStatusChangerDTO){
+        return comboProductService.reactivateComboProduct(productStatusChangerDTO);
     }
 
     @PutMapping("/cancel")
     @SuccessMessage("Combo cancelado com sucesso")
-    public ComboProduct cancelComboProduct(){
-        return null;
+    public ComboProduct cancelComboProduct(ComboProductStatusChangerDTO productStatusChangerDTO){
+        return comboProductService.cancellingComboProduct(productStatusChangerDTO);
+    }
+
+    @PostMapping("/purchase")
+    @SuccessMessage("Combo comprado com sucesso")
+    public PurchaseComboDTO purchaseComboProduct(PurchaseComboDTO purchaseComboDTO){
+        return comboProductService.purchaseProducts(purchaseComboDTO);
     }
 }

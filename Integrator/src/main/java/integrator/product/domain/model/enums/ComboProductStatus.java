@@ -1,5 +1,7 @@
 package integrator.product.domain.model.enums;
 
+import integrator.product.controller.dtos.ComboProductStatusChangerDTO;
+
 public enum ComboProductStatus {
     ACTIVE("Ativo"),
     INACTIVE("Inativo"),
@@ -11,6 +13,17 @@ public enum ComboProductStatus {
     UNIQUE_PRODUCT("Produto único"),;
 
     final String statusDescription;
+
+    public boolean checkingStatusToCancelOrReactive(){
+        return this == CANCELLED_BY_COMPANY || this == CANCELLED_BY_PARTNER;
+    }
+
+    public boolean verifyStatusToReactivate(ComboProductStatus comboProductStatus){
+        return comboProductStatus.checkingStatusToCancelOrReactive() &&
+                !comboProductStatus.equals(ComboProductStatus.ACTIVE);
+    }
+
+
 
     ComboProductStatus (String statusDescription){
         this.statusDescription = statusDescription;

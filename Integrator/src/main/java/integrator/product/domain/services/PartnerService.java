@@ -3,7 +3,6 @@ package integrator.product.domain.services;
 import integrator.product.domain.model.entities.Partner;
 import integrator.product.domain.model.enums.PartnerStatus;
 import integrator.product.domain.model.exceptions.BadRequestException;
-import integrator.product.domain.model.exceptions.InternalServerErrorException;
 import integrator.product.domain.model.exceptions.NotFoundException;
 import integrator.product.domain.model.mappers.PartnerMapper;
 import integrator.product.domain.repository.PartnerRepository;
@@ -11,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static integrator.product.controller.validator.utils.ServiceExecutorExceptionHandler.execute;
+import static integrator.product.domain.model.exceptions.ServiceExecutorExceptionHandler.execute;
 
 @Service
 public class PartnerService {
@@ -50,7 +49,7 @@ public class PartnerService {
                 throw new BadRequestException("Parceiro com contrato cancelado. Não é possivel mudar as informações");
             }
 
-            partnerMapper.updateClientFromDto(partner, existingPartner);
+            partnerMapper.updatePartnerFromDto(partner, existingPartner);
             return partnerRepository.save(existingPartner);
         });
     }
