@@ -3,6 +3,7 @@ package integrator.product.domain.services;
 import integrator.product.controller.dtos.ComboProductDTO;
 import integrator.product.controller.dtos.ComboProductStatusChangerDTO;
 import integrator.product.controller.dtos.PurchaseComboDTO;
+import integrator.product.domain.model.entities.Client;
 import integrator.product.domain.model.entities.ComboProduct;
 import integrator.product.domain.model.enums.ComboProductStatus;
 import integrator.product.domain.model.exceptions.BadRequestException;
@@ -126,15 +127,5 @@ public class ComboProductService {
             return comboProductRepository.save(existingComboProduct);
 
         });
-    }
-
-    public PurchaseComboDTO purchaseProducts(PurchaseComboDTO purchaseComboDTO){
-
-        for(Long id : purchaseComboDTO.getComboId()){
-            ComboProduct existingComboProduct = comboProductRepository.getComboProductById(id)
-                    .orElseThrow(() -> new NotFoundException("Combo não encontrado"));
-        }
-
-        return null;
     }
 }

@@ -68,10 +68,4 @@ public class ComboProductController {
     public ComboProduct cancelComboProduct(ComboProductStatusChangerDTO productStatusChangerDTO){
         return comboProductService.cancellingComboProduct(productStatusChangerDTO);
     }
-
-    @PostMapping("/purchase")
-    @SuccessMessage("Combo comprado com sucesso")
-    public PurchaseComboDTO purchaseComboProduct(PurchaseComboDTO purchaseComboDTO){
-        return comboProductService.purchaseProducts(purchaseComboDTO);
-    }
 }
