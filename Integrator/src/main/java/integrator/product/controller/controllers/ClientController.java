@@ -53,9 +53,15 @@ public class ClientController {
         return clientService.reactivateClient(reactivateDTO);
     }
 
-    @DeleteMapping("/{document}")
+    @PutMapping("/suspend")
+    @SuccessMessage("Cliente suspenso com sucesso")
+    public Client deactivateClient(@RequestBody @Valid ReactivateDTO reactivateDTO){
+        return clientService.deactivateClient(reactivateDTO);
+    }
+
+    @PutMapping("/cancel")
     @SuccessMessage("Cliente cancelado com sucesso")
-    public Client cancellingClient(@RequestBody @CpfCnpj String document){
-        return clientService.cancellingClient(document);
+    public Client cancellingClient(@RequestBody @Valid ReactivateDTO reactivateDTO){
+        return clientService.cancellingClient(reactivateDTO);
     }
 }

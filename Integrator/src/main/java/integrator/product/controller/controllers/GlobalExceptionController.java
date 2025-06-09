@@ -4,6 +4,7 @@ import integrator.product.controller.response.ErrorResponse;
 import integrator.product.domain.model.exceptions.BadRequestException;
 import integrator.product.domain.model.exceptions.InternalServerErrorException;
 import integrator.product.domain.model.exceptions.NotFoundException;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class GlobalExceptionController {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
-                ex.getMessage(),
+                ex.getLocalizedMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
 
@@ -71,7 +72,7 @@ public class GlobalExceptionController {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> constraintViolationHandler(ConstraintViolationException ex, WebRequest request) {
         String errorMessage = ex.getConstraintViolations().stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .findFirst()
                 .orElse("Erro de validação de restrição");
 

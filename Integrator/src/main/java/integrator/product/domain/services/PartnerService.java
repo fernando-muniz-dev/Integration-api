@@ -26,6 +26,11 @@ public class PartnerService {
 
     public Partner postNewPartner(Partner partner){
         return execute(logger,"Erro ao cadastrar o parceiro", () -> {
+
+            if(!partner.getPartnerStatus().equals(PartnerStatus.ACTIVE)){
+                throw new BadRequestException("Status inválido para esta operação");
+            }
+
             partnerRepository.getPartnerByPartnerDocument(partner.getPartnerDocument()).ifPresent(
                     c -> {throw new BadRequestException("Parceiro ja esta cadastrado"); }
             );

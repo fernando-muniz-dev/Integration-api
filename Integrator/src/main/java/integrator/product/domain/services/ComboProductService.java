@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static integrator.product.domain.model.exceptions.ServiceExecutorExceptionHandler.execute;
 
@@ -35,13 +36,16 @@ public class ComboProductService {
     public ComboProduct postNewComboProduct(ComboProductDTO comboProductDTO){
         return execute(logger,"Erro ao cadastrar o combo", () -> {
 
+            if(!comboProductDTO.getComboProductStatus().equals(ComboProductStatus.ACTIVE)){
+                throw new BadRequestException("Status inválido para esta operação");
+            }
+
             ComboProduct comboProduct = comboProductMapper.toEntity(comboProductDTO);
 
             comboProduct = comboProductRepository.save(comboProduct);
 
             if(!comboProductDTO.getComboProductAttaches().isEmpty())
                 comboProductAttachService.attachComboProductOnCreation(comboProductDTO.getComboProductAttaches(), comboProduct);
-
 
             return comboProduct;
         });
@@ -127,5 +131,9 @@ public class ComboProductService {
             return comboProductRepository.save(existingComboProduct);
 
         });
+    }
+
+    public ComboProduct getComboProductNotThrowingException(Long id){
+        return execute(logger,"Erro ao recuperar o combo", () -> comboProductRepository.getComboProductById(id).orElseGet(() -> null));
     }
 }

@@ -24,8 +24,8 @@ public class ProductDTO {
     @JsonProperty("productSku")
     private String productSku;
 
-    @JsonProperty("productPartner")
-    private Partner productPartner;
+    @JsonProperty("productPartnerDocument")
+    private String productPartnerDocument;
 
     @JsonProperty("productPrice")
     private BigDecimal productPrice;

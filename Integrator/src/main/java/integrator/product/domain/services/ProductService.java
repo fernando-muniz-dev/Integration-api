@@ -1,5 +1,6 @@
 package integrator.product.domain.services;
 
+import integrator.product.controller.dtos.ProductDTO;
 import integrator.product.controller.dtos.ProductStatusChangerDTO;
 import integrator.product.domain.model.entities.Product;
 import integrator.product.domain.model.enums.ProductStatus;
@@ -12,6 +13,8 @@ import integrator.product.domain.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static integrator.product.domain.model.exceptions.ServiceExecutorExceptionHandler.execute;
 
@@ -29,18 +32,24 @@ public class ProductService {
         this.productMapper = productMapper;
     }
 
-    public Product postNewProduct(Product product){
+    public Product postNewProduct(ProductDTO product){
 
         return execute(logger, "Erro ao cadastrar o produto", () ->{
+
+            if(!product.getProductStatus().equals(ProductStatus.AVAILABLE)){
+                throw new BadRequestException("Status inválido para esta operação");
+            }
 
             productRepository.getProductBySKU(product.getProductSku())
                     .ifPresent( c -> {throw new BadRequestException("Produto ja cadastrado"); }
                     );
 
-            partnerRepository.getPartnerByPartnerDocument(product.getProductPartner().getPartnerDocument())
-                    .orElseThrow(() -> new NotFoundException("Parceiro do produto não encontrado"));
+            Product newProduct = productMapper.toEntity(product);
 
-            return productRepository.save(product);
+            newProduct.setProductPartner(partnerRepository.getPartnerByPartnerDocument(product.getProductPartnerDocument())
+                    .orElseThrow(() -> new NotFoundException("Parceiro do produto não encontrado")));
+
+            return productRepository.save(newProduct);
         });
     }
 
@@ -50,6 +59,20 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado")));
     }
 
+    public List<Product> getAllAvailableProducts(){
+        return execute(logger, "Erro ao recuperar o produto", () -> {
+
+            List<Product> allActiveProducts =productRepository.getAllActiveProducts();
+
+            if(allActiveProducts.isEmpty()){
+                throw new BadRequestException("Não foi possivel recuperar nenhum produto disponivel");
+            }
+
+            return allActiveProducts;
+
+        });
+    }
+
     public Product updateProduct(Product product){
 
         return execute(logger, "Erro ao atualizar o produto", () ->{
@@ -57,15 +80,16 @@ public class ProductService {
                     .orElseThrow(()-> new NotFoundException("Produto não encontrado"));
 
             productMapper.updateProductFromDto(product, existingProduct);
+            productRepository.save(existingProduct);
             return existingProduct;
 
         });
     }
 
-    public Product reactivateProduct(String productSku){
+    public Product reactivateProduct(ProductStatusChangerDTO productStatusChangerDTO){
         return execute(logger, "Erro ao reativar o produto", () -> {
 
-            Product existingProduct = productRepository.getProductBySKU(productSku)
+            Product existingProduct = productRepository.getProductBySKU(productStatusChangerDTO.getProductSku())
                     .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
             if(existingProduct.getProductStatus() == null)
@@ -76,6 +100,9 @@ public class ProductService {
 
             if(existingProduct.getProductStatus().canBeCancelled())
                 throw new BadRequestException("Status atual não permite reativação");
+
+            if(productStatusChangerDTO.getProductStatus().canBeCancelled())
+                throw new BadRequestException("Status não é permitido nesta operação");
 
             existingProduct.setProductStatus(ProductStatus.AVAILABLE);
             productRepository.save(existingProduct);
@@ -93,7 +120,13 @@ public class ProductService {
             if (existingProduct.getProductStatus() == null)
                  throw new InternalServerErrorException("Status do produto é null, verifique a inconsistencia");
 
-            if(!existingProduct.getProductStatus().equals(ProductStatus.AVAILABLE))
+            if (existingProduct.getProductStatus().canBeCancelled())
+                throw new BadRequestException("Produto se encontra cancelado e não pode ser reativado");
+
+            if (existingProduct.getProductStatus().isProductSuspended())
+                throw new BadRequestException("Produto ja se encontra desativado");
+
+            if(!productStatusChangerDTO.getProductStatus().isProductSuspended())
                 throw new BadRequestException("Status atual não permite a desativação");
 
             existingProduct.setProductStatus(productStatusChangerDTO.getProductStatus());

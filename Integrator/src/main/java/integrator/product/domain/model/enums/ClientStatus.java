@@ -15,11 +15,11 @@ public enum ClientStatus{
     final String statusDescription;
 
     public boolean canBeReactivated() {
-        return this != CANCELLED_BY_NO_PAYMENT && this != CANCELLED_BY_OWNER;
+        return this == CANCELLED_BY_NO_PAYMENT || this == CANCELLED_BY_OWNER;
     }
 
-    public boolean canBeCancelled() {
-        return this != CANCELLED_BY_NO_PAYMENT && this != CANCELLED_BY_OWNER;
+    public boolean canBeSuspended(){
+        return this == SUSPENDED_BY_NO_PAYMENT || this == SUSPENDED_BY_OWNER;
     }
 
     ClientStatus(String statusDescription){

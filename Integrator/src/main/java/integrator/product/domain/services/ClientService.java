@@ -30,6 +30,10 @@ public class ClientService {
 
         return execute(logger, "Erro ao cadastrar o cliente", () -> {
 
+            if(client.getClientStatus().equals(ClientStatus.ACTIVE)){
+                throw new BadRequestException("Status inválido para esta operação");
+            }
+
             clientRepository.getClientByClientDocument(client.getClientDocument()).ifPresent(c -> {throw new BadRequestException("Cliente ja esta cadastrado");});
             return clientRepository.save(client);
 
@@ -70,6 +74,9 @@ public class ClientService {
             Client existingClient = clientRepository.getClientByClientDocument(reactivateDTO.getDocument())
                     .orElseThrow(() -> new NotFoundException("Cliente não encontrado"));
 
+            if (!reactivateDTO.getClientStatus().equals(ClientStatus.ACTIVE))
+                throw new BadRequestException("Status inválido para esta operação");
+
             if(existingClient.getClientStatus() == null){
                 throw new InternalServerErrorException("Status do cliente é null, verificar inconsistencia");
             }
@@ -79,7 +86,7 @@ public class ClientService {
             }
 
             if (existingClient.getClientStatus().canBeReactivated()) {
-                throw new BadRequestException("Status atual não permite reativação");
+                throw new BadRequestException("Status atual do cliente não permite reativação");
             }
 
             existingClient.setClientStatus(reactivateDTO.getClientStatus());
@@ -89,12 +96,41 @@ public class ClientService {
         });
     }
 
-    public Client cancellingClient(String document){
+    public Client deactivateClient(ReactivateDTO reactivateDTO){
+
+        return execute(logger,"Erro ao desativar o cliente", () ->{
+            Client existingClient = clientRepository.getClientByClientDocument(reactivateDTO.getDocument())
+                    .orElseThrow(() -> new NotFoundException("Cliente não encontrado"));
+
+            if(existingClient.getClientStatus() == null){
+                throw new InternalServerErrorException("Status do cliente é null, verificar inconsistencia");
+            }
+
+            if (!reactivateDTO.getClientStatus().canBeSuspended()) {
+                throw new BadRequestException("Status atual não permite desativação");
+            }
+
+            if(existingClient.getClientStatus().canBeSuspended()){
+                throw new BadRequestException("Cliente ja esta suspenso");
+            }
+
+            existingClient.setClientStatus(reactivateDTO.getClientStatus());
+            clientRepository.save(existingClient);
+
+            return existingClient;
+        });
+    }
+
+    public Client cancellingClient(ReactivateDTO reactivateDTO){
 
         return execute(logger,"Erro ao cancelar o cliente", () ->{
-            Client existingClient = clientRepository.getClientByClientDocument(document).orElseThrow(() -> new NotFoundException("Cliente não encontrado"));
+            Client existingClient = clientRepository.getClientByClientDocument(reactivateDTO.getDocument()).orElseThrow(() -> new NotFoundException("Cliente não encontrado"));
 
-            if (!existingClient.getClientStatus().canBeCancelled()){
+            if(!reactivateDTO.getClientStatus().canBeReactivated()){
+                throw new BadRequestException("Status inválido para esta operação");
+            }
+
+            if (existingClient.getClientStatus().canBeReactivated()){
                 throw new BadRequestException("Cliente ja esta cancelado");
             }
 

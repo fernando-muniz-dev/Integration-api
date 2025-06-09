@@ -4,25 +4,24 @@ import integrator.product.controller.validator.constraints.ValidEnum;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EnumValidator implements ConstraintValidator<ValidEnum, String> {
+public class EnumValidator implements ConstraintValidator<ValidEnum, Enum<?>> {
 
-    private Class<? extends Enum<?>> enumClass;
-    private boolean ignoreCase;
+    private Set<String> acceptedValues;
 
     @Override
-    public void initialize(ValidEnum constraintAnnotation) {
-        this.enumClass = constraintAnnotation.enumClass();
-        this.ignoreCase = constraintAnnotation.ignoreCase();
+    public void initialize(ValidEnum annotation) {
+        acceptedValues = Arrays.stream(annotation.enumClass().getEnumConstants())
+                .map(Enum::name)
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null) return false;
-
-        return Stream.of(enumClass.getEnumConstants())
-                .map(Enum::name)
-                .anyMatch(e -> ignoreCase ? e.equalsIgnoreCase(value) : e.equals(value));
+    public boolean isValid(Enum<?> value, ConstraintValidatorContext context) {
+        return value == null || acceptedValues.contains(value.name());
     }
 }

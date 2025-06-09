@@ -15,6 +15,10 @@ public enum ProductStatus {
         return this == DISCONTINUED_BY_COMPANY || this == DISCONTINUED_BY_PARTNER;
     }
 
+    public boolean isProductSuspended(){
+        return this == UNAVAILABLE_BY_COMPANY || this == UNAVAILABLE_BY_PARTNER;
+    }
+
     final String statusDescription;
 
     ProductStatus(String statusDescription) {

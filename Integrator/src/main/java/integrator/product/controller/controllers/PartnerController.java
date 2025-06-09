@@ -22,7 +22,7 @@ public class PartnerController {
         this.partnerMapper = partnerMapper;
     }
 
-    @PostMapping()
+    @PostMapping
     @SuccessMessage("Parceiro cadastrado com sucesso")
     public Partner postNewPartner(@RequestBody @Valid PartnerDTO partnerDTO){
         return partnerService.postNewPartner(partnerMapper.toEntity(partnerDTO));
@@ -33,7 +33,7 @@ public class PartnerController {
         return partnerService.getPartner(document);
     }
 
-    @PutMapping()
+    @PutMapping
     @SuccessMessage("Parceiro atualizado com sucesso")
     public Partner updatePartnerInfo(@RequestBody @Valid PartnerDTO partnerDTO){
         return partnerService.updatePartnerInfo(partnerMapper.toEntity(partnerDTO));
