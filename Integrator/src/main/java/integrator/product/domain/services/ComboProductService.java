@@ -3,8 +3,11 @@ package integrator.product.domain.services;
 import integrator.product.controller.dtos.ComboProductDTO;
 import integrator.product.controller.dtos.ComboProductStatusChangerDTO;
 import integrator.product.controller.dtos.PurchaseComboDTO;
+import integrator.product.controller.response.ComboProductAttachResponse;
+import integrator.product.controller.response.ComboProductCreated;
 import integrator.product.domain.model.entities.Client;
 import integrator.product.domain.model.entities.ComboProduct;
+import integrator.product.domain.model.entities.ComboProductAttach;
 import integrator.product.domain.model.enums.ComboProductStatus;
 import integrator.product.domain.model.exceptions.BadRequestException;
 import integrator.product.domain.model.exceptions.NotFoundException;
@@ -14,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +37,13 @@ public class ComboProductService {
         this.comboProductMapper = comboProductMapper;
     }
 
-    public ComboProduct postNewComboProduct(ComboProductDTO comboProductDTO){
+    public ComboProductCreated postNewComboProduct(ComboProductDTO comboProductDTO){
         return execute(logger,"Erro ao cadastrar o combo", () -> {
 
-            if(!comboProductDTO.getComboProductStatus().equals(ComboProductStatus.ACTIVE)){
+            ComboProductCreated comboProductCreated = new ComboProductCreated();
+            List<ComboProductAttachResponse> comboProductAttaches = new ArrayList<>();
+
+            if(!comboProductDTO.getComboProductStatus().equals(ComboProductStatus.ACTIVE) && !comboProductDTO.getComboProductStatus().equals(ComboProductStatus.UNIQUE_PRODUCT)){
                 throw new BadRequestException("Status inválido para esta operação");
             }
 
@@ -44,10 +51,13 @@ public class ComboProductService {
 
             comboProduct = comboProductRepository.save(comboProduct);
 
-            if(!comboProductDTO.getComboProductAttaches().isEmpty())
-                comboProductAttachService.attachComboProductOnCreation(comboProductDTO.getComboProductAttaches(), comboProduct);
+            if(comboProductDTO.getProductsSkuToAttaches()!= null && !comboProductDTO.getProductsSkuToAttaches().isEmpty())
+                comboProductAttaches = comboProductAttachService.attachComboProductOnCreation(comboProductDTO.getProductsSkuToAttaches(), comboProduct);
 
-            return comboProduct;
+            comboProductCreated.setComboProduct(comboProduct);
+            comboProductCreated.setComboProductAttachList(comboProductAttaches);
+
+            return comboProductCreated;
         });
     }
 

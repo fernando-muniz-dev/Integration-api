@@ -4,10 +4,12 @@ import integrator.product.controller.response.ErrorResponse;
 import integrator.product.domain.model.exceptions.BadRequestException;
 import integrator.product.domain.model.exceptions.InternalServerErrorException;
 import integrator.product.domain.model.exceptions.NotFoundException;
+import jakarta.persistence.NonUniqueResultException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -86,4 +88,30 @@ public class GlobalExceptionController {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> httpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request){
+
+//        String errorMessage = ex.getMessage() + " : " + ex.getCause();
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Valor passado do status é inválida-",
+                null,
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NonUniqueResultException.class)
+    public ResponseEntity<ErrorResponse> nonUniqueResultException(NonUniqueResultException ex, WebRequest request){
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getLocalizedMessage() + " .Contate o setor de desenvolvimento",
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

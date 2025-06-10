@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ComboProductMapper {
 
-    @Mapping(target = "comboProductAttaches", ignore = true)
+    @Mapping(target = "productsSkuToAttaches", ignore = true)
     ComboProductDTO toDto(ComboProduct comboProduct);
 
     ComboProduct toEntity(ComboProductDTO comboProductDTO);

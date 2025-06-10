@@ -28,5 +28,5 @@ public class ComboProductDTO {
     @ValidEnum(enumClass = ComboProductStatus.class, ignoreCase = true)
     private ComboProductStatus comboProductStatus;
 
-    private List<ComboProductAttach> comboProductAttaches;
+    private List<String> productsSkuToAttaches;
 }

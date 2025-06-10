@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static integrator.product.domain.model.exceptions.ServiceExecutorExceptionHandler.execute;
 
@@ -57,6 +58,11 @@ public class ProductService {
 
         return execute(logger, "Erro ao recuperar o produto", () -> productRepository.getProductBySKU(productSku)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado")));
+    }
+
+    public Product getProductWithoutException(String productSku){
+
+        return execute(logger, "Erro ao recuperar o produto", () -> productRepository.getProductBySKU(productSku).orElseGet(() ->null));
     }
 
     public List<Product> getAllAvailableProducts(){

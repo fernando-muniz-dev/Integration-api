@@ -5,9 +5,13 @@ import integrator.product.controller.response.ComboProductCreatedAndAttached;
 import integrator.product.domain.model.entities.Client;
 import integrator.product.domain.model.entities.ComboProduct;
 import integrator.product.domain.model.entities.ComboProductClientAttach;
+import integrator.product.domain.model.exceptions.BadRequestException;
 import integrator.product.domain.repository.ComboProductClientAttachRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,7 +35,7 @@ public class ComboProductClientAttachService {
         this.comboProductClientAttachRepository = comboProductClientAttachRepository;
     }
 
-    public PurchaseComboDTO purchaseProducts(PurchaseComboDTO purchaseComboDTO){
+    public List<ComboProductCreatedAndAttached> purchaseProducts(PurchaseComboDTO purchaseComboDTO){
 
         return execute(logger, "Erro inesperado ao comprar os produtos", () ->{
             List<ComboProductCreatedAndAttached> comboProductCreatedAndAttached = new ArrayList<>();
@@ -42,17 +46,18 @@ public class ComboProductClientAttachService {
                 ComboProduct existingComboProduct = comboProductService.getComboProductNotThrowingException(id);
 
                 if (existingComboProduct != null){
-                    comboProductClientAttachRepository.save(new ComboProductClientAttach(null, existingComboProduct,client, 1, LocalDateTime.now()));
+                    if(comboProductClientAttachRepository.getAttachmentClientAndComboProduct(existingComboProduct, client).isEmpty()){
+                        comboProductClientAttachRepository.save(new ComboProductClientAttach(null, existingComboProduct,client, 0, LocalDateTime.now()));
+                        comboProductCreatedAndAttached.add(new ComboProductCreatedAndAttached(true, "Produto "+ existingComboProduct.getComboName() +": comprado com sucesso"));
+                    }else{
+                        comboProductCreatedAndAttached.add(new ComboProductCreatedAndAttached(false, "O cliente ja possui este produto: " + existingComboProduct.getComboName()));
+                    }
                 }else{
                     comboProductCreatedAndAttached.add(new ComboProductCreatedAndAttached(false, "Erro ao comprar o combo com o id: " + id));
                 }
             }
 
-            if(!comboProductCreatedAndAttached.isEmpty()){
-                return null;
-            }
-
-            return null;
+            return comboProductCreatedAndAttached;
 
         });
     }
